@@ -11,6 +11,6 @@ export const AppDataSource = new DataSource({
   synchronize: true,  // Automatically synchronize the schema
   logging: false,
   entities: [Contact],
-  migrations: ["src/db/migrations/*{.ts,.js}"],
+  migrations: ["dist/db/migrations/*{.ts,.js}"],
   subscribers: [],
 });
