@@ -14,7 +14,7 @@ export class Contact {
   @Column({ nullable: true, type: "uuid" })
   linkedId?: string;
 
-  @Column({ type: "enum", enum: ["primary", "secondary"], default: "primary" })
+  @Column({ nullable: true })
   linkPrecedence?: string;
 
   @CreateDateColumn({ type: "timestamptz", default: () => "NOW()" })
