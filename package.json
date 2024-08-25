@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typeorm:generate": "npx typeorm-ts-node-esm migration:generate -d dist/db/datasource.js",
+    "typeorm:migrate": "npx typeorm-ts-node-esm migration:run -d dist/db/datasource.js"
   },
   "keywords": [],
   "author": "",
