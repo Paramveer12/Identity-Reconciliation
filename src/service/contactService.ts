@@ -29,7 +29,7 @@ export class ContactService {
 
         const existingContact = existingContacts.find(contact => contact.email === email && contact.phoneNumber === phoneNumber);
         var primaryContact = existingContacts.find(contact => contact.linkPrecedence === "primary");
-        if (primaryContact === null && primaryContact === undefined) {
+        if (primaryContact === null || primaryContact === undefined) {
             var dbPrimaryContact = await this.contactRepository.findOne({
                 where:
                     { id: existingContacts[0].linkedId}
