@@ -17,6 +17,7 @@ export class ContactService {
             ]
         });
 
+        // no matching contacts, create new as primary
         if (existingContacts.length === 0) {
             const newContact = this.contactRepository.create({
                 email,
@@ -29,7 +30,7 @@ export class ContactService {
 
         //get exact contact if exists
         const exactContact = existingContacts.find(contact => contact.email === email && contact.phoneNumber === phoneNumber);
-        
+
         var primaryContact = await this.getParent(existingContacts);
         var secondaryContacts = await this.contactRepository.find({
             where:
@@ -62,20 +63,28 @@ export class ContactService {
     }
 
     private async linkExistingContacts(existingContactWithEmail: Contact, primaryContact: Contact, existingContactWithPhone: Contact, secondaryContacts: Contact[]) {
-        var secondaryPrimary = 0;
+        // find second primary
+        var secondPrimary = 0;
         if (existingContactWithEmail.linkPrecedence == "primary" && existingContactWithEmail.id != primaryContact!.id) {
-            secondaryPrimary = existingContactWithEmail.id!;
+            secondPrimary = existingContactWithEmail.id!;
         } else if (existingContactWithEmail.linkPrecedence == "secondary" && existingContactWithEmail.linkedId != primaryContact!.id) {
-            secondaryPrimary = existingContactWithEmail.linkedId!;
+            secondPrimary = existingContactWithEmail.linkedId!;
         } else if (existingContactWithPhone.linkPrecedence == "primary" && existingContactWithPhone.id != primaryContact!.id) {
-            secondaryPrimary = existingContactWithPhone.id!;
+            secondPrimary = existingContactWithPhone.id!;
         } else if (existingContactWithPhone.linkPrecedence == "secondary" && existingContactWithPhone.linkedId != primaryContact!.id) {
-            secondaryPrimary = existingContactWithPhone.linkedId!;
+            secondPrimary = existingContactWithPhone.linkedId!;
+        }
+
+        // if no second primary found, it means its already linked previously
+        if (secondPrimary === 0) {
+            return this.formatResponse(primaryContact!, secondaryContacts);
         }
 
         const secondaryPrimaryContact = await this.contactRepository.findOne({
-            where: { id: secondaryPrimary }
+            where: { id: secondPrimary }
         });
+
+        //find true primary based on created_at and make the other one secondary
         var truePrimary = primaryContact;
         if (secondaryPrimaryContact!.createdAt > primaryContact!.createdAt) {
             secondaryPrimaryContact!.linkPrecedence = "secondary";
@@ -89,10 +98,11 @@ export class ContactService {
             await this.contactRepository.update({ linkedId: primaryContact!.id }, { linkedId: secondaryPrimaryContact!.id });
             truePrimary = secondaryPrimaryContact!;
         }
+        // get updated secondary contacts
         secondaryContacts = await this.contactRepository.find({
             where: { linkedId: truePrimary!.id }
         });
-        return { __return: this.formatResponse(truePrimary!, secondaryContacts)};
+        return this.formatResponse(truePrimary!, secondaryContacts);
     }
 
     //find primary contact in existingContacts or fetch from db based on linked ID of first record
