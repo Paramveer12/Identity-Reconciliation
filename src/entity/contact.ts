@@ -2,8 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 
 @Entity()
 export class Contact {
-  @PrimaryGeneratedColumn("uuid")
-  id?: string;
+  @PrimaryGeneratedColumn("increment", { type: "bigint" })
+  id?: number;
 
   @Column({ nullable: true })
   phoneNumber?: string;
@@ -11,8 +11,8 @@ export class Contact {
   @Column({ nullable: true })
   email?: string;
 
-  @Column({ nullable: true, type: "uuid" })
-  linkedId?: string;
+  @Column({ nullable: true, type: "bigint" })
+  linkedId?: number;
 
   @Column({ nullable: true })
   linkPrecedence?: string;
